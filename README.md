@@ -2,12 +2,6 @@
 
 NetTools é um repositório de estudos práticos em Python voltado a ferramentas simples de rede e utilitários de linha de comando. Este README descreve apenas os arquivos presentes neste repositório.
 
-## Conteúdo do repositório
-- LICENSE — arquivo de licença do repositório.
-- Portas.py — scanner de portas em faixa (multithread).
-- Portas_especifica.py — verificador de porta única (open/closed).
-- netcat.py — implementação tipo “netcat” com opções de listener, upload, execução e shell interativo.
-
 ## Pré-requisitos
 - Python 3.8+ recomendado
 - Em alguns comandos (ex.: sniffing, binding em portas baixas) permissões de administrador podem ser necessárias.
