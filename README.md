@@ -1,6 +1,6 @@
 # NetTools
 
-NetTools é um repositório de estudos práticos em Python voltado a ferramentas simples de rede e utilitários de linha de comando. Este README descreve apenas os arquivos presentes neste repositório.
+NetTools é um repositório de estudos práticos em Python voltado a ferramentas simples de rede e utilitários de linha de comando.
 
 ## Pré-requisitos
 - Python 3.8+ recomendado
