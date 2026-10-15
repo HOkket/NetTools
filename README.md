@@ -5,7 +5,8 @@ NetTools é um repositório de estudos práticos em Python voltado a ferramentas
 ## Pré-requisitos
 - Python 3.8+ recomendado
 - Em alguns comandos (ex.: sniffing, binding em portas baixas) permissões de administrador podem ser necessárias.
-- Não há requirements.txt neste repositório; as dependências são apenas as bibliotecas padrão do Python utilizadas nos scripts.
+- A maioria dos scripts usa apenas a biblioteca padrão do Python.
+- Extras opcionais: `psutil` (para `systool.py top` e para o `sysmon_svg.py`) e `matplotlib` (`systool.py disk --svg` e `sysmon_svg.py`). Sem eles, os demais comandos continuam funcionando.
 
 ## Uso dos scripts
 
@@ -76,6 +77,40 @@ Comportamento:
 - Em modo cliente, conecta e permite troca interativa de dados.
 - Em modo servidor, aceita conexões e, dependendo das flags, executa comando, salva upload ou fornece shell de comando.
 - Implementa tratamento básico de mudanças de diretório (`cd`) e execução via subprocess.
+
+### systool.py
+Utilitários **read-only** para administração de Linux: inventário do sistema, top de processos, uso de disco, portas em escuta, conexões (via `ss`), validade de certificados TLS, resumo de erros/logins falhos e um diagnóstico agregado (`health`). Não altera nada no sistema — apenas lê `/proc`, `/sys`, sockets e chama comandos de consulta.
+
+Exemplos:
+```bash
+python systool.py info                # inventário do sistema
+python systool.py top -n 10           # top processos por CPU e memória
+python systool.py disk /var/log --svg disco.svg
+python systool.py ports               # portas em escuta + processo dono
+python systool.py conns -n 10 --listen
+python systool.py certs exemplo.com:443 outro.com
+python systool.py logs -n 15          # erros do kernel e logins falhos
+python systool.py health              # diagnóstico agregado (OK/WARN/CRIT)
+```
+
+Comportamento:
+- Prioriza dados de `/proc` e `/sys`; usa `psutil` e `matplotlib` quando disponíveis (opcionais).
+- `ports` e `conns` podem exigir `sudo` para mostrar o processo dono dos sockets.
+- Compatível com Python 3.8+ e sem dependências obrigatórias.
+
+### sysmon_svg.py
+Coleta uso de recursos (CPU, RAM, swap, I/O de disco e rede) por um período e exporta um **gráfico SVG**.
+
+Exemplo de execução:
+```bash
+python sysmon_svg.py                          # 30s, amostra a cada 1s -> sysmon.svg
+python sysmon_svg.py -d 60 -i 2 -o cpu.svg
+```
+
+Comportamento:
+- Requer `psutil` e `matplotlib` (dependências opcionais deste repositório).
+- Três painéis: CPU/RAM/Swap (%), disco (leitura/escrita em MB/s) e rede (RX/TX em MB/s).
+- Gera o SVG sem precisar de display/X11 (backend `Agg`).
 
 ## Boas práticas e segurança
 - Nunca execute scanners, varreduras ou uploads em redes/hosts sem autorização.
