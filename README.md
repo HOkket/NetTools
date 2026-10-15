@@ -3,21 +3,22 @@
 NetTools é um repositório de estudos práticos em Python voltado a ferramentas simples de rede e utilitários de linha de comando.
 
 ## Pré-requisitos
-- Python 3.8+ recomendado
-- Em alguns comandos (ex.: sniffing, binding em portas baixas) permissões de administrador podem ser necessárias.
+- Python 3.8+ recomendado.
+- Alguns comandos podem exigir permissões de administrador (ex.: sniffing, binding em portas baixas, ver o processo dono dos sockets).
 - A maioria dos scripts usa apenas a biblioteca padrão do Python.
-- Extras opcionais: `psutil` (para `systool.py top` e para o `sysmon_svg.py`) e `matplotlib` (`systool.py disk --svg` e `sysmon_svg.py`). Sem eles, os demais comandos continuam funcionando.
+- Dependências opcionais: `psutil` e `matplotlib` — usadas por `systool.py` (top e `disk --svg`) e exigidas por `sysmon_svg.py`. Sem elas, os demais comandos continuam funcionando.
+- O subdiretório `Cliente-Servidor SSH/` tem seu próprio `requirements.txt` (Paramiko).
 
 ## Uso dos scripts
 
 Observação importante: execute varreduras ou conexões apenas em hosts/rede para os quais você tem autorização explícita.
 
-### Portas.py
+### Doorman.py
 Scanner de portas em faixa usando threads e timeout curto.
 
 Exemplo de execução:
 ```bash
-python Portas.py
+python Doorman.py
 # O script pedirá:
 #   Digite o IP/Dominio:
 #   Digite a porta inicial:
@@ -25,9 +26,13 @@ python Portas.py
 ```
 
 Comportamento:
-- Inicia threads para cada porta no intervalo informado.
+- Cria uma thread por porta do intervalo informado.
+- Limita a 300 conexões simultâneas via `threading.Semaphore`.
 - Timeout de conexão de 0.5s.
 - Mensagem exibida quando encontra porta aberta: "Porta Aberta ==> <porta>"
+- Trata `Ctrl+C`, host não resolvido e porta inválida.
+
+> Observação: este arquivo chamava-se `Portas.py` e foi renomeado para `Doorman.py`.
 
 ### Portas_especifica.py
 Checa se uma porta específica em um host está aberta ou fechada.
@@ -43,6 +48,22 @@ python Portas_especifica.py
 Comportamento:
 - Cria um socket TCP com timeout de 0.5s.
 - Exibe "Porta Aberta ==>" ou "Porta Fechada ==>" conforme o resultado.
+- Trata `Ctrl+C`, host não resolvido e porta inválida.
+
+### conversosr_de_ips.py
+Converte um endereço IPv4 (base 10, ex.: `127.0.0.1`) para outras representações.
+
+Exemplo de execução:
+```bash
+python conversosr_de_ips.py
+# Insira o IP: 127.0.0.1
+```
+
+Comportamento — para o IP informado, exibe:
+- Hexadecimal com pontos (ex.: `0x7f.0x00.0x00.0x01`)
+- Hexadecimal único (ex.: `0x7f000001`)
+- Octal com pontos (ex.: `0177.00.00.01`)
+- Decimal inteiro / DWORD (ex.: `2130706433`)
 
 ### netcat.py
 Ferramenta estilo netcat com modos cliente e servidor, suporte a upload, execução de comando e shell interativo.
@@ -112,10 +133,27 @@ Comportamento:
 - Três painéis: CPU/RAM/Swap (%), disco (leitura/escrita em MB/s) e rede (RX/TX em MB/s).
 - Gera o SVG sem precisar de display/X11 (backend `Agg`).
 
+### Cliente-Servidor SSH/
+Conjunto de scripts de estudo sobre SSH com a biblioteca [Paramiko](https://www.paramiko.org/). Requer `Paramiko` (veja `requirements.txt` na própria pasta).
+
+- `ssh_server.py` — servidor SSH de teste com Paramiko. Escuta em `192.168.0.174:2222`, autentica com credenciais de exemplo (`tim` / `secret`) e usa a chave de host `test_rsa.key`.
+  - ⚠️ Ajuste o IP/porta, troque as credenciais e **gere a chave de host** antes de rodar (ex.: `ssh-keygen -t rsa -b 2048 -f test_rsa.key`). Use apenas em laboratório — nunca em produção.
+- `ssh_rcmd.py` — cliente que conecta ao servidor e executa os comandos que o servidor enviar (fluxo de "comando reverso").
+- `cliente-SSH.py` — cliente SSH com dois modos: comando único e shell interativo (múltiplos comandos sem reconectar).
+
+Passos típicos:
+```bash
+cd "Cliente-Servidor SSH"
+pip install -r requirements.txt        # Paramiko
+python ssh_server.py                   # em uma máquina (após ajustar IP/porta e gerar a chave)
+python cliente-SSH.py                  # em outra, para conectar
+```
+
 ## Boas práticas e segurança
 - Nunca execute scanners, varreduras ou uploads em redes/hosts sem autorização.
 - Use ambientes isolados (VMs/containers) para testes invasivos.
-- Ferramentas que permitem execução remota de comandos (como `netcat.py`) representam riscos; use apenas para fins educacionais em ambientes controlados.
+- Ferramentas que permitem execução remota de comandos (como `netcat.py` e os scripts de SSH) representam riscos; use apenas para fins educacionais em ambientes controlados.
+- As credenciais de exemplo em `ssh_server.py` são apenas ilustrativas — não as reutilize fora de um laboratório.
 - Ajuste timeouts e limites de threads conforme capacidade da sua máquina e da rede.
 
 ## Contribuição
@@ -125,11 +163,4 @@ Comportamento:
   - Inclua testes ou instruções de uso quando aplicar mudanças significativas.
 
 ## Licença
-Consulte o arquivo `LICENSE` presente no repositório para os termos de uso.
-
-## Observações finais
-- Este README foi escrito especificamente para refletir apenas os arquivos que estão neste repositório atualmente.
-- Se quiser, eu posso:
-  - Substituir o README existente no repositório por este conteúdo,
-  - Ou criar um PR com o README em uma branch separada.
-  Indique qual ação prefere e em qual branch devo aplicar.
+Este projeto está sob a **GNU General Public License v3.0 (GPLv3)**. Consulte o arquivo `LICENSE` para os termos completos.
